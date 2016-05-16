@@ -1,5 +1,7 @@
 @echo off
-setlocal enableextensions
+setlocal enabledelayedexpansion
+
+if %1. equ . goto :usage
 
 set VERSION=0.9
 set FILENAME=%~n1
@@ -14,12 +16,17 @@ call set L=%%MAP:*%L%-=%%
 SET L=%L:;=&rem.%
 set NAME=%L%%NAME:~1%
 
+if %2. equ . goto :gen_guid
+set GUID=%2
+goto :create_sec
+:gen_guid
 rem *** Create a new GUID
 echo set obj = CreateObject("Scriptlet.TypeLib") > genguid.vbs
 echo WScript.StdOut.WriteLine Replace(Replace(obj.GUID,"{",""),"}","") >> genguid.vbs
 for /f %%a in ('cscript //nologo genguid.vbs') do set "GUID=%%a"
 del genguid.vbs
 
+:create_sec
 rem *** Create 3 sections: PE32, driver name (UI) and driver version
 gensec -o pe32.sec %1 -S EFI_SECTION_PE32
 gensec -o name.sec -S EFI_SECTION_USER_INTERFACE -n %NAME%
@@ -27,3 +34,16 @@ gensec -o ver.sec -S EFI_SECTION_VERSION -n %VERSION%
 
 rem *** Combine all the sections into a driver module
 genffs -d 1 -g %GUID% -o %FILENAME%.ffs -i pe32.sec -i name.sec -i ver.sec -t EFI_FV_FILETYPE_DRIVER
+
+del *.sec
+
+goto :end
+
+:usage
+echo.
+echo GenMod - Create UEFI firmware driver modules (FFS's) from EFI driver binaries
+echo.
+echo Usage: GenMod driver_^<ARCH^>.efi [GUID]
+echo.
+
+:end
