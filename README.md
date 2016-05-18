@@ -84,4 +84,8 @@ GenSec -o ver.sec -S EFI_SECTION_VERSION -n "1.0"
 GenFfs -d 1 -g "12341234-1234-1234-1234-123412341234" -o ntfs.ffs -i pe32.sec -i name.sec -i ver.sec -t EFI_FV_FILETYPE_DRIVER
 ```
 
-Or you can also use the `GenMod` batch file under `Scripts`, which takes the driver executable and an optional GUID as parameters.
+Or you can also use the `GenMod` batch file under `Scripts`, which takes the driver executable and an
+optional GUID as parameters.
+
+For a detailed guide on how you may use FFS to insert an NTFS EFI driver into a VMWare firmware image,
+please have a look [here](https://github.com/pbatard/efifs/wiki/Adding-a-driver-to-a-UEFI-firmware).
